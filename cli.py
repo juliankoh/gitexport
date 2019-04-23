@@ -23,6 +23,8 @@ def export_from_github(token, exclude, verbose):
 
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     github = Github(token)
     repo_names = set(github.list_all_repo_name())

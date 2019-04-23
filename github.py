@@ -1,16 +1,19 @@
 import requests
 import os
+import logging
+
+logger = logging.getLogger('cli')
 
 
 class Github:
     def __init__(self, token):
         self.token = token
         self.username = self.get_username()
-        print(self.username)
+        logging.debug('Username is '+self.username)
 
     def make_req(self, url, payload):
         final_url = "https://api.github.com" + url
-        print(f"sending request to {final_url}")
+        logging.debug(f'Accessing {final_url}...')
         headers = {'Authorization': 'token %s' % self.token}
         return (requests.get(final_url, headers=headers, params=payload))
 
@@ -18,17 +21,10 @@ class Github:
         result = self.make_req("/user", {}).json()
         return (result['login'])
 
-    def list_all_repo(self):
-        result = (self.make_req("/user/repos", {})).json()
-        for repo in result:
-            print(repo['name'])
-
     def list_all_repo_name(self):
         result = (self.make_req("/user/repos", {})).json()
-        list = []
-        for repo in result:
-            list.append(repo['full_name'])
-        return list
+        repo_names = [repo['full_name'] for repo in result]
+        return repo_names
 
     def normalize_repo_name(self, repo_name):
         user, repo = repo_name.split('/')
@@ -41,6 +37,7 @@ class Github:
         with open(filepath, "wb") as file:
             response = self.make_req("/repos/"+url+"/tarball/master", {})
             file.write(response.content)
+            logging.info(f'Downloaded to {filepath}')
 
 
 if __name__ == '__main__':
