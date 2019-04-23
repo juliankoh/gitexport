@@ -6,8 +6,9 @@ logger = logging.getLogger('cli')
 
 
 class Github:
-    def __init__(self, token):
+    def __init__(self, token, user_data_dir):
         self.token = token
+        self.user_data_dir = user_data_dir
         self.username = self.get_username()
         logging.debug('Username is '+self.username)
 
@@ -31,13 +32,14 @@ class Github:
         normalized = user+'__'+repo
         return normalized
 
-    def download_repo(self, url, directory):
+    def download_repo(self, url):
         filename = self.normalize_repo_name(url)+'.tar'
-        filepath = os.path.join(directory, filename)
+        filepath = os.path.join(self.user_data_dir, filename)
         with open(filepath, "wb") as file:
             response = self.make_req("/repos/"+url+"/tarball/master", {})
             file.write(response.content)
             logging.info(f'Downloaded to {filepath}')
+        return filepath
 
 
 if __name__ == '__main__':

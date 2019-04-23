@@ -1,7 +1,8 @@
 import click
-from github import Github
 import os
 import logging
+from github import Github
+from gitlab import Gitlab
 
 
 USER_DATA_PATH = os.path.join(
@@ -16,8 +17,8 @@ def init_user_data_dir():
 @click.command()
 @click.option('-t', '--token',
               prompt='Your GitHub access token', hide_input=True, help="Your personal GitHub access token")
-@click.option('-e', '--exclude', multiple=True, type=str)
-@click.option('-v', '--verbose', type=bool)
+@click.option('-e', '--exclude', multiple=True, type=str, help="Excludes these repositories from being exported")
+@click.option('-v', '--verbose', is_flag=True, help='Enables verbose logging')
 def export_from_github(token, exclude, verbose):
     init_user_data_dir()
 
@@ -26,7 +27,8 @@ def export_from_github(token, exclude, verbose):
     else:
         logging.basicConfig(level=logging.INFO)
 
-    github = Github(token)
+    github = Github(token, USER_DATA_PATH)
+    gitlab = Gitlab(token, USER_DATA_PATH)
     repo_names = set(github.list_all_repo_name())
 
     for exclude_repo in exclude:
@@ -34,7 +36,8 @@ def export_from_github(token, exclude, verbose):
 
     for repo_name in repo_names:
         # parallelize this work with threading and generators
-        github.download_repo(repo_name, USER_DATA_PATH)
+        tar_path = github.download_repo(repo_name)
+        gitlab.export(tar_path)
 
 
 if __name__ == '__main__':
