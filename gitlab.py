@@ -21,7 +21,7 @@ class ExportDestination:
         # just remove and start over
         if os.path.exists(extraction_dir):
             shutil.rmtree(extraction_dir)
-            os.mkdir(extraction_dir)
+        os.mkdir(extraction_dir)
 
         tar = tarfile.open(filepath)
         tar.extractall(path=extraction_dir)
